@@ -1,71 +1,87 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
 
 export default function ContantApp() {
-  const [data, setData] = useState([]);
-  const id = useRef("");
-  const name = useRef("");
-  const roll = useRef("");
-  const date = useRef("");
-  const status = useRef("");
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    id: "",
+    name: "",
+    roll: "",
+    date: "",
+    status: "",
+  });
 
-  const addAttendnaceFormData = async (e) => {
+  const [data, setData] = useState([]);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission
+  const addAttendance = (e) => {
     e.preventDefault();
-    const insert = {
-      id: id.current.value,
-      name: name.current.value,
-      roll: roll.current.value,
-      date: date.current.value,
-      status: status.current.value,
-    };
-    try {
-      setData([...data, insert]);
+
+    if (!formData.status) {
       Swal.fire({
-        title: "Good job!",
-        text: "Your Attendance added successfully!",
-        icon: "success",
+        icon: "error",
+        title: "Oops...",
+        text: "Please select attendance status!",
       });
-      e.target.reset();
-    } catch (error) {
-      console.log("error generating while add attendance", error);
+      return;
     }
+
+    setData([...data, formData]);
+
+    Swal.fire({
+      title: "Good job!",
+      text: "Your attendance has been added successfully!",
+      icon: "success",
+    });
+
+    // Reset form
+    setFormData({
+      id: "",
+      name: "",
+      roll: "",
+      date: "",
+      status: "",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      {/* Title */}
       <h1 className="text-center text-2xl sm:text-3xl font-semibold text-indigo-700 mb-6">
         CRUD App (Create | Read | Update | Delete)
       </h1>
 
-      {/* Form Section */}
+      {/* Form */}
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6 mb-10">
-        <h2 className="text-lg font-semibold text-indigo-700 mb-4">
-          Add Attendance
-        </h2>
-        <form
-          onSubmit={addAttendnaceFormData}
-          className="space-y-4 text-sm sm:text-base"
-        >
+        <h2 className="text-lg font-semibold text-indigo-700 mb-4">Add Attendance</h2>
+        <form onSubmit={addAttendance} className="space-y-4 text-sm sm:text-base">
           {/* ID */}
           <div>
             <label className="block font-medium mb-1">ID</label>
             <input
               type="number"
-              ref={id}
+              name="id"
+              value={formData.id}
+              onChange={handleChange}
               className="w-full border border-indigo-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter ID"
+              required
             />
           </div>
 
-          {/* Student Name */}
+          {/* Name */}
           <div>
             <label className="block font-medium mb-1">Student Name</label>
             <select
-              ref={name}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               className="w-full border border-indigo-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
             >
               <option value="">- Select Student -</option>
               <option value="Avtar">Avtar</option>
@@ -79,14 +95,17 @@ export default function ContantApp() {
             </select>
           </div>
 
-          {/* Roll Number */}
+          {/* Roll */}
           <div>
             <label className="block font-medium mb-1">Roll Number</label>
             <input
               type="number"
-              ref={roll}
+              name="roll"
+              value={formData.roll}
+              onChange={handleChange}
               className="w-full border border-indigo-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter Roll No"
+              required
             />
           </div>
 
@@ -95,24 +114,37 @@ export default function ContantApp() {
             <label className="block font-medium mb-1">Date</label>
             <input
               type="date"
-              ref={date}
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
               className="w-full border border-indigo-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
             />
           </div>
 
-          {/* Attendance Status */}
-          <div>
-            <label className="block font-medium mb-2">Status</label>
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-1">
-                <input type="radio" name="status" ref={status} value="Present" />
-                Present
-              </label>
-              <label className="flex items-center gap-1">
-                <input type="radio" name="status" ref={status} value="Absent" />
-                Absent
-              </label>
-            </div>
+          {/* Status */}
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="status"
+                value="Present"
+                checked={formData.status === "Present"}
+                onChange={handleChange}
+                required
+              />
+              Present
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="status"
+                value="Absent"
+                checked={formData.status === "Absent"}
+                onChange={handleChange}
+              />
+              Absent
+            </label>
           </div>
 
           {/* Submit */}
@@ -126,40 +158,24 @@ export default function ContantApp() {
         </form>
       </div>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="max-w-5xl mx-auto bg-white shadow rounded-lg p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Attendance Records
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">Attendance Records</h2>
           <p className="text-sm text-gray-600">
-            Date:{" "}
-            <span className="font-medium text-gray-800">
-              {new Date().toLocaleDateString()}
-            </span>
+            Date: <span className="font-medium text-gray-800">{new Date().toLocaleDateString()}</span>
           </p>
         </div>
 
-        {/* Responsive Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm sm:text-base divide-y divide-gray-200">
             <thead className="bg-indigo-50">
               <tr>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">
-                  #
-                </th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">
-                  Name
-                </th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">
-                  Roll No
-                </th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">
-                  Date
-                </th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-700">
-                  Status
-                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">#</th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">Roll No</th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">Date</th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -172,9 +188,7 @@ export default function ContantApp() {
                     <td className="px-4 py-2">{std.date}</td>
                     <td
                       className={`px-4 py-2 font-medium ${
-                        std.status === "Present"
-                          ? "text-green-600"
-                          : "text-red-600"
+                        std.status === "Present" ? "text-green-600" : "text-red-600"
                       }`}
                     >
                       {std.status}
@@ -183,10 +197,7 @@ export default function ContantApp() {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan="5"
-                    className="text-center text-gray-500 py-4 italic"
-                  >
+                  <td colSpan="5" className="text-center text-gray-500 py-4 italic">
                     No attendance records found.
                   </td>
                 </tr>
